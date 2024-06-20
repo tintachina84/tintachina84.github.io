@@ -1,0 +1,1933 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html lang="en-US" data-preset="contrast" data-primary-color="#307FFF"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="UTF-8"><meta name="robots" content="noindex"><meta name="built-on" content="2024-06-20T13:56:41.495924"><title>Chapter 3 - API 명세 및 구현 | Infosiatec Workshop</title><script type="application/json" id="virtual-toc-data">[{"id":"3-1-oas-api","level":0,"title":"3.1 OAS를 활용한 API 디자인","anchor":"#3-1-oas-api"},{"id":"3-2-oas","level":0,"title":"3.2 OAS의 기본 구조를 이해하기","anchor":"#3-2-oas"},{"id":"3-3-oas-spring","level":0,"title":"3.3 OAS를 Spring 코드로 변환하기","anchor":"#3-3-oas-spring"},{"id":"3-4-oas","level":0,"title":"3.4 OAS 코드 인터페이스 구현하기","anchor":"#3-4-oas"},{"id":"3-5-global-exception-handler","level":0,"title":"3.5 Global Exception Handler 추가하기","anchor":"#3-5-global-exception-handler"},{"id":"3-6-api","level":0,"title":"3.6 구현된 API를 테스트 해보기","anchor":"#3-6-api"}]</script><script type="application/json" id="topic-shortcuts"></script><link href="https://resources.jetbrains.com/writerside/apidoc/6.10.0-b267/app.css" rel="stylesheet"><meta name="msapplication-TileColor" content="#000000"><link rel="apple-touch-icon" sizes="180x180" href="https://jetbrains.com/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="https://jetbrains.com/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://jetbrains.com/favicon-16x16.png"><meta name="msapplication-TileImage" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-144x144.png"><meta name="msapplication-square70x70logo" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-70x70.png"><meta name="msapplication-square150x150logo" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-310x150.png"><meta name="msapplication-square310x310logo" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-310x310.png"><meta name="image" content=""><!-- Open Graph --><meta property="og:title" content="Chapter 3 - API 명세 및 구현 | Infosiatec Workshop"><meta property="og:description" content=""><meta property="og:image" content=""><meta property="og:site_name" content="Infosiatec Workshop Help"><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="writerside-documentation/chapter03.html"><!-- End Open Graph --><!-- Twitter Card --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content=""><meta name="twitter:title" content="Chapter 3 - API 명세 및 구현 | Infosiatec Workshop"><meta name="twitter:description" content=""><meta name="twitter:creator" content=""><meta name="twitter:image:src" content=""><!-- End Twitter Card --><!-- Schema.org WebPage --><script type="application/ld+json">{
+    "@context": "http://schema.org",
+    "@type": "WebPage",
+    "@id": "writerside-documentation/chapter03.html#webpage",
+    "url": "writerside-documentation/chapter03.html",
+    "name": "Chapter 3 - API 명세 및 구현 | Infosiatec Workshop",
+    "description": "",
+    "image": "",
+    "inLanguage":"en-US"
+}</script><!-- End Schema.org --><!-- Schema.org WebSite --><script type="application/ld+json">{
+    "@type": "WebSite",
+    "@id": "writerside-documentation/#website",
+    "url": "writerside-documentation/",
+    "name": "Infosiatec Workshop Help"
+}</script><!-- End Schema.org --></head><body data-id="Chapter03" data-main-title="Chapter 3 - API 명세 및 구현" data-article-props="{&quot;seeAlso&quot;:[{&quot;title&quot;:&quot;참고문헌&quot;,&quot;links&quot;:[{&quot;url&quot;:&quot;https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md&quot;,&quot;text&quot;:&quot;OAS 3.0&quot;},{&quot;url&quot;:&quot;https://github.com/int128/gradle-swagger-generator-plugin&quot;,&quot;text&quot;:&quot;Gradle plugin for OpenAPI Codegen&quot;},{&quot;url&quot;:&quot;https://openapi-generator.tech/docs/generators/spring&quot;,&quot;text&quot;:&quot;OAS Code Generator configuration options for Spring&quot;},{&quot;url&quot;:&quot;https://yaml.org/spec/&quot;,&quot;text&quot;:&quot;YAML Specification&quot;}]}],&quot;seeAlsoStyle&quot;:&quot;links&quot;}" data-template="article" data-breadcrumbs=""><div class="wrapper"><main class="panel _main"><header class="panel__header"><div class="container"><h3>Infosiatec Workshop  Help</h3><div class="panel-trigger"></div></div></header><section class="panel__content"><div class="container"><article class="article" data-shortcut-switcher="inactive"><h1 data-toc="Chapter03" id="Chapter03.md">Chapter 3 - API 명세 및 구현</h1><p id="fax9io_2">OpenAPI Specification (OAS)을 활용하여 먼저 API를 디자인하고 나중에 구현할 것입니다. 또한 요청을 처리하는 동안 발생하는 오류를 어떻게 다루는지도 배우겠습니다. 이 장에서는 샘플 전자 상거래 앱의 API를 디자인하고 구현하는 예시를 사용할 것입니다.</p><p id="fax9io_3">이 장을 마치면 API 사양을 설계하고 OpenAPI 코드 생성기를 사용하여 모델 및 API Java 인터페이스의 코드를 생성할 수 있을 것입니다.</p><ul class="list _bullet" id="fax9io_4"><li class="list__item" id="fax9io_5"><p>OAS를 활용한 API 디자인</p></li><li class="list__item" id="fax9io_6"><p>OAS의 기본 구조를 이해하기</p></li><li class="list__item" id="fax9io_7"><p>OAS를 Spring 코드로 변환하기</p></li><li class="list__item" id="fax9io_8"><p>OAS 코드 인터페이스 구현</p></li><li class="list__item" id="fax9io_9"><p>글로벌 예외 처리기 추가</p></li><li class="list__item" id="fax9io_10"><p>컨트롤러 구현 테스트</p></li></ul><section class="chapter"><h2 id="3-1-oas-api" data-toc="3-1-oas-api">3.1 OAS를 활용한 API 디자인</h2><p id="fax9io_11">API 코딩을 직접 시작할 수 있지만, 이 방식은 자주 수정해야 하고 API 관리가 어렵며, 비기술 영역 팀이 주도하는 리뷰가 어려워지는 등 여러 문제가 발생할 수 있습니다. 따라서 <span class="control" id="fax9io_12">디자인 우선 접근 방식</span>을 사용해야 합니다.</p><p id="fax9io_13">디자인 우선 접근 방식은 API를 먼저 설계하고, 그 다음에 구현하는 방식입니다. 이 방식은 API를 설계하고 문서화하고, 팀원들과 공유하고, 리뷰하고, 수정하고, 최종적으로 구현하는 방식입니다. 이러한 방식은 API를 설계하고 문서화하는 데 사용할 수 있는 여러 도구가 있습니다. 그 중 하나가 OpenAPI Specification (OAS)입니다. OAS는 API를 설계하고 문서화하는 데 사용할 수 있는 표준이며, JSON 또는 YAML 형식으로 작성할 수 있습니다.</p><p id="fax9io_14">우리는 더 깔끔하고 읽기 쉬운 YAML을 사용할 것입니다. <br><a href="https://yaml.org/spec/" id="fax9io_16" data-external="true" rel="noopener noreferrer">YAML 상세</a></p><p id="fax9io_17">OAS는 이전에 Swagger Specification으로 알려졌습니다. 오늘날에도 OAS를 지원하는 도구들은 여전히 Swagger 도구로 알려져 있습니다. Swagger 도구들은 REST API의 전반적인 개발 수명주기를 돕는 오픈 소스 프로젝트들입니다.</p><ul class="list _bullet" id="fax9io_18"><li class="list__item" id="fax9io_19"><p>Swagger Editor: REST API의 설계와 설명을 동시에 작성하고 미리 볼 수 있게 해줍니다. OAS 3.0을 사용하도록 하세요. <a href="https://editor.swagger.io/" id="fax9io_20" data-external="true" rel="noopener noreferrer">링크</a></p></li><li class="list__item" id="fax9io_21"><p>Swagger Codegen: Spring 기반 API 모델과 Java 인터페이스를 생성하는 데 사용됩니다. Swagger Codegen 위에서 작동하는 코드를 생성하기 위해 Gradle 플러그인 (https://github.com/int128/gradle-swagger-generator-plugin)을 사용할 것입니다. <a href="https://github.com/swagger-api/swagger-codegen" id="fax9io_22" data-external="true" rel="noopener noreferrer">링크</a></p></li><li class="list__item" id="fax9io_23"><p>Swagger UI: REST API 문서를 생성하는 데 사용됩니다. 동일한 Gradle 플러그인을 사용하여 API 문서를 생성할 것입니다. <a href="https://swagger.io/swagger-ui/" id="fax9io_24" data-external="true" rel="noopener noreferrer">링크</a></p></li></ul></section><section class="chapter"><h2 id="3-2-oas" data-toc="3-2-oas">3.2 OAS의 기본 구조를 이해하기</h2><p id="fax9io_25">오픈API 정의 구조는 다음 섹션으로 나뉠 수 있습니다 (모두 키워드이며 대소문자를 구분합니다):</p><ul class="list _bullet" id="fax9io_26"><li class="list__item" id="fax9io_27"><p>openapi (version)</p></li><li class="list__item" id="fax9io_28"><p>info</p></li><li class="list__item" id="fax9io_29"><p>externalDocs</p></li><li class="list__item" id="fax9io_30"><p>servers</p></li><li class="list__item" id="fax9io_31"><p>tags</p></li><li class="list__item" id="fax9io_32"><p>paths</p></li><li class="list__item" id="fax9io_33"><p>components</p></li></ul><p id="fax9io_34">위 키워드는 모두 root의 하위 키워드로 사용됩니다. openapi, info, externalDocs는 메타데이터를 정의하는데 사용합니다.</p><section class="chapter"><h3 id="oas" data-toc="oas">OAS의 메타데이터 섹션</h3><section class="chapter"><h4 id="api" data-toc="api">전자 상거래 API 정의의 메타데이터 섹션</h4><div class="code-block" data-lang="yaml">
+
+openapi: 3.0.3
+info:
+  title: Sample Ecommerce App
+  description: &gt;
+    'This is a ***sample ecommerce app API***.  You can find out more about Swagger at [swagger.io](http://swagger.io).
+    Description supports markdown markup. For example, you can use the `inline code` using back ticks.'
+  termsOfService: https://github.com/PacktPublishing/Modern-API-Development-with-Spring-6-and-Spring-Boot-3/blob/main/LICENSE
+  contact:
+    name: Packt Support
+    url: https://www.infosiatec.com
+    email: support@packtpub.com
+  license:
+    name: MIT
+    url: https://github.com/PacktPublishing/Modern-API-Development-with-Spring-6-and-Spring-Boot-3/blob/main/LICENSE
+  version: 1.0.0
+externalDocs:
+  description: Any document link you want to generate along with API.
+  url: http://swagger.io
+
+</div><ul class="list _bullet" id="fax9io_37"><li class="list__item" id="fax9io_38"><p>openapi: openapi 섹션은 API 정의를 작성하는 데 사용된 OAS를 알려줍니다.</p></li><li class="list__item" id="fax9io_39"><p>info: info 섹션은 API의 메타데이터를 정의합니다. 이 섹션은 API의 제목, 설명, 버전, 서비스 약관, 라이선스, 연락처 정보, API 버전 등을 포함합니다.</p></li><li class="list__item" id="fax9io_40"><p>externalDocs: externalDocs 섹션은 API에 대한 외부 문서 링크를 제공합니다. URL 속성은 필수이며 외부 문서로 연결됩니다.</p></li></ul></section><section class="chapter"><h4 id="oas_1" data-toc="oas_1">OAS의 서버 및 태그 섹션</h4><div class="code-block" data-lang="yaml">
+
+servers:
+  - url: https://ecommerce.swagger.io/v2
+tags:
+  - name: cart
+    description: Everything about cart
+    externalDocs:
+      description: Find out more (extra document link)
+      url: http://swagger.io
+  - name: order
+    description: Operation about orders
+
+</div><ul class="list _bullet" id="fax9io_43"><li class="list__item" id="fax9io_44"><p>servers: 서버 섹션은 API를 호스팅하는 서버 목록을 포함하는 선택적 섹션입니다. 서버 URL은 url 속성을 사용하여 표시됩니다.</p></li><li class="list__item" id="fax9io_45"><p>tags: 태그 섹션은 API의 엔드포인트를 그룹화하는 데 사용됩니다. 태그는 name 속성을 사용하여 정의되며, description 속성은 선택적입니다. 태그는 API 문서에서 사용자가 API를 쉽게 찾을 수 있도록 도와줍니다.</p></li></ul></section><section class="chapter"><h4 id="oas_2" data-toc="oas_2">OAS의 구성 요소 섹션</h4><div class="code-block" data-lang="yaml">
+
+components:
+  schemas:
+    Cart:
+      description: Shopping Cart of the user
+      type: object
+      properties:
+        customerId:
+          description: Id of the customer who possesses the cart
+          type: string
+        items:
+          description: Collection of items in cart.
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+
+</div><p id="fax9io_48">여기서 우리는 Cart라는 모델을 정의합니다. Cart 모델은 객체 유형이며 customerId(문자열)와 items(배열)이라는 두 개의 필드를 포함합니다.</p><p id="fax9io_49">자바로 표현해보자면 이런 형태입니다.</p><div class="code-block" data-lang="java">
+
+    public class Cart {
+        private String customerId;
+        private List&lt;Item&gt; items;
+    }
+
+</div><p id="fax9io_52">OAS는 다음과 같이 여섯가지 기본 데이터 유형을 지원합니다. 모두 소문자입니다.</p><ul class="list _bullet" id="fax9io_53"><li class="list__item" id="fax9io_54"><p>string</p></li><li class="list__item" id="fax9io_55"><p>number</p></li><li class="list__item" id="fax9io_56"><p>integer</p></li><li class="list__item" id="fax9io_57"><p>boolean</p></li><li class="list__item" id="fax9io_58"><p>object</p></li><li class="list__item" id="fax9io_59"><p>array</p></li></ul><div class="code-block" data-lang="yaml">
+
+orderDate: 
+  type: string
+  format: date-time
+
+</div><p id="fax9io_62">orderDate는 문자열 형식으로 정의되었지만 format은 어떤 형태의 문자열 값이 할당될지를 결정합니다. 예를들어, <span class="control" id="fax9io_63">2020-10-22T19:31:58Z</span>와 같은 UTC 시간 형식이 될겁니다.</p><p id="fax9io_64">그 외 참조할 포맷</p><div class="table-wrapper"><table class="wide" id="fax9io_65"><thead><tr class="ijRowHead" id="fax9io_66"><th id="fax9io_67"><p>type</p></th><th id="fax9io_68"><p>format</p></th><th id="fax9io_69"><p>description</p></th></tr></thead><tbody><tr id="fax9io_70"><td id="fax9io_71"><p>number</p></td><td id="fax9io_72"><p>float</p></td><td id="fax9io_73"><p>부동 소수점 숫자</p></td></tr><tr id="fax9io_74"><td id="fax9io_75"><p>number</p></td><td id="fax9io_76"><p>double</p></td><td id="fax9io_77"><p>double 정밀도의 부동 소수점 숫자</p></td></tr><tr id="fax9io_78"><td id="fax9io_79"><p>integer</p></td><td id="fax9io_80"><p>int32</p></td><td id="fax9io_81"><p>부호 있는 32비트 정수</p></td></tr><tr id="fax9io_82"><td id="fax9io_83"><p>integer</p></td><td id="fax9io_84"><p>int64</p></td><td id="fax9io_85"><p>부호 있는 64비트 정수</p></td></tr><tr id="fax9io_86"><td id="fax9io_87"><p>string</p></td><td id="fax9io_88"><p>date</p></td><td id="fax9io_89"><p>날짜 형식 예) 2020-10-20</p></td></tr><tr id="fax9io_90"><td id="fax9io_91"><p>string</p></td><td id="fax9io_92"><p>byte</p></td><td id="fax9io_93"><p>바이트 형식의 문자열 예) Base64로 인코딩된 값</p></td></tr><tr id="fax9io_94"><td id="fax9io_95"><p>string</p></td><td id="fax9io_96"><p>binary</p></td><td id="fax9io_97"><p>이진 데이터 예) 파일</p></td></tr></tbody></table></div><p id="fax9io_98">카트 모델의 아이템 필드는 사용자 정의된 아이템 타입의 배열입니다. 여기서 아이템은 다른 모델이며 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.464ex;" xmlns="http://www.w3.org/2000/svg" width="49.574ex" height="2.161ex" role="img" focusable="false" viewBox="0 -750 21911.7 955"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45F" d="M21 287Q22 290 23 295T28 317T38 348T53 381T73 411T99 433T132 442Q161 442 183 430T214 408T225 388Q227 382 228 382T236 389Q284 441 347 441H350Q398 441 422 400Q430 381 430 363Q430 333 417 315T391 292T366 288Q346 288 334 299T322 328Q322 376 378 392Q356 405 342 405Q286 405 239 331Q229 315 224 298T190 165Q156 25 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 114 189T154 366Q154 405 128 405Q107 405 92 377T68 316T57 280Q55 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mi" transform="translate(451,0)"><path data-c="1D452" d="M39 168Q39 225 58 272T107 350T174 402T244 433T307 442H310Q355 442 388 420T421 355Q421 265 310 237Q261 224 176 223Q139 223 138 221Q138 219 132 186T125 128Q125 81 146 54T209 26T302 45T394 111Q403 121 406 121Q410 121 419 112T429 98T420 82T390 55T344 24T281 -1T205 -11Q126 -11 83 42T39 168ZM373 353Q367 405 305 405Q272 405 244 391T199 357T170 316T154 280T149 261Q149 260 169 260Q282 260 327 284T373 353Z"></path></g><g data-mml-node="mi" transform="translate(917,0)"><path data-c="1D453" d="M118 -162Q120 -162 124 -164T135 -167T147 -168Q160 -168 171 -155T187 -126Q197 -99 221 27T267 267T289 382V385H242Q195 385 192 387Q188 390 188 397L195 425Q197 430 203 430T250 431Q298 431 298 432Q298 434 307 482T319 540Q356 705 465 705Q502 703 526 683T550 630Q550 594 529 578T487 561Q443 561 443 603Q443 622 454 636T478 657L487 662Q471 668 457 668Q445 668 434 658T419 630Q412 601 403 552T387 469T380 433Q380 431 435 431Q480 431 487 430T498 424Q499 420 496 407T491 391Q489 386 482 386T428 385H372L349 263Q301 15 282 -47Q255 -132 212 -173Q175 -205 139 -205Q107 -205 81 -186T55 -132Q55 -95 76 -78T118 -61Q162 -61 162 -103Q162 -122 151 -136T127 -157L118 -162Z"></path></g><g data-mml-node="mi" transform="translate(1467,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">를</text></g><g data-mml-node="mi" transform="translate(2467,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">사</text></g><g data-mml-node="mi" transform="translate(3467,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">용</text></g><g data-mml-node="mi" transform="translate(4467,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">하</text></g><g data-mml-node="mi" transform="translate(5467,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">여</text></g><g data-mml-node="mi" transform="translate(6467,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">참</text></g><g data-mml-node="mi" transform="translate(7467,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">조</text></g><g data-mml-node="mi" transform="translate(8467,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">됩</text></g><g data-mml-node="mi" transform="translate(9467,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">니</text></g><g data-mml-node="mi" transform="translate(10467,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">다</text></g><g data-mml-node="mo" transform="translate(11467,0)"><path data-c="2E" d="M78 60Q78 84 95 102T138 120Q162 120 180 104T199 61Q199 36 182 18T139 0T96 17T78 60Z"></path></g><g data-mml-node="mi" transform="translate(11911.7,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">모</text></g><g data-mml-node="mi" transform="translate(12911.7,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">든</text></g><g data-mml-node="mi" transform="translate(13911.7,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">사</text></g><g data-mml-node="mi" transform="translate(14911.7,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">용</text></g><g data-mml-node="mi" transform="translate(15911.7,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">자</text></g><g data-mml-node="mi" transform="translate(16911.7,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">정</text></g><g data-mml-node="mi" transform="translate(17911.7,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">의</text></g><g data-mml-node="mi" transform="translate(18911.7,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">타</text></g><g data-mml-node="mi" transform="translate(19911.7,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">입</text></g><g data-mml-node="mi" transform="translate(20911.7,0)"><text data-variant="italic" transform="scale(1,-1)" font-size="884px" font-family="serif" font-style="italic">은</text></g></g></g></svg></mjx-container>ref를 사용하여 참조됩니다. 아이템 모델 또한 components/schema 섹션의 일부입니다. 따라서 $ref의 값은 사용자 정의 타입에 대한 참조를 포함하고 있습니다. <br><code class="code" id="fax9io_101">#/component/schemas/user-custom-type-here</code></p><p id="fax9io_102">$ref는 참조 객체를 나타냅니다. 동일 문서나 외부 문서의 객체를 참조할 수 있습니다. 따라서 API 정의가 여러 파일로 분할된 경우 사용됩니다.</p><p id="fax9io_103">Item 모델도 살펴보죠.</p><div class="code-block" data-lang="yaml">
+
+Item:
+  description: Items in shopping cart
+  type: object
+  properties:
+    id:
+      description: Item Identifier
+      type: string
+    quantity:
+      description: The item quantity
+      type: integer
+      format: int32
+    unitPrice:
+      description: The item's price per unit
+      type: number
+      format: double
+
+</div><p id="fax9io_106">Item 모델은 구성 components/schema 섹션의 일부입니다. 전자 상거래 앱 API에서 사용하는 여러 모델을 정의했습니다.</p><p id="fax9io_107">이제 OAS의 path 섹션에서 API 엔드포인트를 정의하는 방법을 살펴보겠습니다.</p></section></section><section class="chapter"><h3 id="oas_3" data-toc="oas_3">OAS의 path 섹션</h3><p id="fax9io_108">여기서 우리는 엔드포인트를 정의합니다. 여기서 URI를 형성하고 HTTP 메소드를 첨부하는 곳입니다.</p><p id="fax9io_109"><code class="code" id="fax9io_110">GET /api/v1/carts/&quot;customerId&quot;</code>에 대한 정의를 해봅시다.</p><div class="code-block" data-lang="yaml">
+
+paths:
+  /api/v1/carts/{customerId}:
+    get:
+      tags:
+        - cart
+      summary: Returns the shopping cart
+      description: Returns the shopping cart of given customer
+      operationId: getCartByCustomerId
+      parameters:
+        - name: customerId
+          in: path
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cart'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cart'
+        404:
+          description: Given customer ID doesn't exist
+          content: {}
+
+</div><p id="fax9io_113">엔드포인트가 무엇인지, 이 API가 어떤 HTTP 메소드와 매개변수를 사용하는지, 그리고 무엇을 기대할 수 있는 응답인지 볼 수 있습니다. 여기서 v1은 API의 버전을 나타냅니다. 각 엔드포인트 경로(/api/v1/carts/customerId/items)에는 해당하는 HTTP 메소드(예: POST)가 있습니다. 엔드포인트 경로는 항상 /로 시작합니다.</p><p id="fax9io_114">각 메서드는 tags, summary, description, operationId, parameters, responses, requestBody의 일곱가지 필드를 가질 수 있습니다.</p><figure id="fax9io_115"><img alt="swagger_1.png" src="images/swagger_1.png" title="swagger_1.png" width="898" height="475"></figure><ul class="list _bullet" id="fax9io_116"><li class="list__item" id="fax9io_117"><p>tags: API의 엔드포인트를 그룹화하는 데 사용됩니다. 태그는 API 문서에서 사용자가 API를 쉽게 찾을 수 있도록 도와줍니다. 위 스크린샷은 cart 태그가 붙은 API의 집합입니다. Swagger Codegen은 태그를 사용하여 API의 메소드를 동일한 클래스에 배치합니다. 예를 들어, 스크린샷에 나열된 모든 cart 엔드포인트는 CartsApi.java에 배치됩니다.</p></li><li class="list__item" id="fax9io_118"><p>summary와 description: summary는 API의 간단한 설명을 제공하고, description은 API의 자세한 설명을 제공합니다. (각 API의 메타데이터)</p></li><li class="list__item" id="fax9io_119"><p>operationId: 작업의 이름을 나타냅니다. 위 코드에서 볼 수 있듯이 getCartByCustomerId 값을 할당했습니다. Swagger Codegen에서는 이와 같은 작업 이름이 생성된 API Java 인터페이스에서 <span class="control" id="fax9io_120">메서드 이름</span>으로 사용될 것입니다.</p></li><li class="list__item" id="fax9io_121"><p>parameters: 자세히 살펴보면 이름 필드 앞에 하이픈(-)이 있습니다. 이는 배열 요소로 선언된 것입니다. 파라미터 필드에는 여러 개의 파라미터가 포함될 수 있습니다. path와 query의 조합이므로 배열일 수밖에 없습니다.</p></li><li class="list__item" id="fax9io_122"><p>responses: 요청 시 API 작업에서 보낼 수 있는 응답 유형을 정의합니다. 기본 필드로 HTTP 상태 코드가 포함됩니다. 이 필드에는 기본 응답 또는 200과 같은 성공적인 HTTP 상태 코드와 같은 적어도 하나의 응답이 있어야 합니다. 이름에서 알 수 있듯이 다른 응답이 정의되지 않았거나 API 작업에서 사용 가능하지 않을 때 기본 응답이 사용됩니다.</p></li><li class="list__item" id="fax9io_123"><p>requestBody: requestBody 필드는 요청 페이로드 객체를 정의하는 데 사용됩니다. responses 객체와 마찬가지로 requestBody에는 description 및 content 필드가 포함됩니다.</p></li></ul><p id="fax9io_124">openapi.yaml에서 코드를 복사하여 <a href="https://editor.swagger.io" id="fax9io_125" data-external="true" rel="noopener noreferrer">편집기</a>에 붙여넣어 API를 사용자 인터페이스로 확인해봅시다. 기본 버전이 3.0으로 설정되어 있지 않은 경우 편집 메뉴를 사용하여 API를 OpenAPI 버전 3으로 변환해야 합니다.</p></section></section><section class="chapter"><h2 id="3-3-oas-spring" data-toc="3-3-oas-spring">3.3 OAS를 Spring 코드로 변환하기</h2><p id="fax9io_126">Spring Initializr에서 프로젝트를 생성합시다.</p><ul class="list _bullet" id="fax9io_127"><li class="list__item" id="fax9io_128"><p>Project: Gradle - Groovy</p></li><li class="list__item" id="fax9io_129"><p>Language: Java</p></li><li class="list__item" id="fax9io_130"><p>Spring Boot: 3.3.0</p></li><li class="list__item" id="fax9io_131"><p>Packaging: Jar</p></li><li class="list__item" id="fax9io_132"><p>Java: 21</p></li><li class="list__item" id="fax9io_133"><p>Dependencies: Spring Web, Lombok</p></li></ul><section class="chapter"><h3 id="build-gradle" data-toc="build-gradle">build.gradle 의존 사항 참고</h3><div class="code-block" data-lang="gradle">
+
+dependencies {
+    // OpenAPI Starts
+    swaggerCodegen 'org.openapitools:openapi-generator-cli:6.2.1'
+    compileOnly 'io.swagger:swagger-annotations:1.6.4'
+    compileOnly 'org.springframework.boot:spring-boot-starter-validation'
+    compileOnly 'org.openapitools:jackson-databind-nullable:0.2.3'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+    // required for schema in swagger generated code
+    implementation 'io.springfox:springfox-oas:3.0.0'
+    // OpenAPI Ends
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+</div></section><section class="chapter"><h3 id="api-swagger" data-toc="api-swagger">우리는 방금 작성한 API 정의로부터 코드 생성을 위해 Swagger 플러그인을 사용할 것입니다.</h3><ol class="list _decimal" id="fax9io_136" type="1"><li class="list__item" id="fax9io_137"><p>Gradle plugin을 추가하세요.</p></li></ol><div class="code-block" data-lang="gradle">
+
+plugins {
+    id 'org.springframework.boot' version '3.0.1'
+    id 'io.spring.dependency-management' version '1.1.0'
+    id 'java'
+    id 'org.hidetake.swagger.generator' version '2.19.2'
+}
+
+</div><ol class="list _decimal" id="fax9io_140" type="1" start="2"><li class="list__item" id="fax9io_141"><p>코드 생성을 위한 OpenAPI 설정 파일을 정의하세요. (/src/main/resources/api/config.json)</p></li></ol><div class="code-block" data-lang="json">
+
+{
+  &quot;library&quot;: &quot;spring-boot&quot;,
+  &quot;dateLibrary&quot;: &quot;java8&quot;,
+  &quot;hideGenerationTimestamp&quot;: true,
+  &quot;modelPackage&quot;: &quot;com.infosiatec.modern.api.model&quot;,
+  &quot;apiPackage&quot;: &quot;com.infosiatec.modern.api&quot;,
+  &quot;invokerPackage&quot;: &quot;com.infosiatec.modern.api&quot;,
+  &quot;serializableModel&quot;: true,
+  &quot;useTags&quot;: true,
+  &quot;useGzipFeature&quot;: true,
+  &quot;hateoas&quot;: true,
+  &quot;unhandledException&quot;: true,
+  &quot;useSpringBoot3&quot;: true,
+  &quot;useSwaggerUI&quot;: true,
+  &quot;typeMappings&quot;: {
+    &quot;URI&quot;: &quot;URI&quot;,
+    &quot;BigDecimal&quot;: &quot;BigDecimal&quot;,
+    &quot;EntityModel&quot;: &quot;EntityModel&quot;
+  },
+  &quot;importMappings&quot;: {
+    &quot;BigDecimal&quot;: &quot;java.math.BigDecimal&quot;,
+    &quot;ResourceSupport&quot;: &quot;org.springframework.hateoas.RepresentationModel&quot;,
+    &quot;Link&quot;: &quot;org.springframework.hateoas.Link&quot;,
+    &quot;EntityModel&quot;: &quot;org.springframework.hateoas.EntityModel&quot;
+  },
+  &quot;schemaMappings&quot;: {
+    &quot;BigDecimal&quot;: &quot;java.math.BigDecimal&quot;
+  }
+}
+
+</div><p id="fax9io_144">생성된 클래스가 Spring Boot 3와 일치하도록 useSpringBoot3가 true로 설정합니다. <br> importMappings 설정은 YAML 파일의 유형을 Java로 또는 외부 라이브러리에 있는 유형으로 매핑할 수 있게 합니다. 모델 중 하나에 Link를 사용하면 생성된 모델은 YAML 파일에 정의된 모델 대신 mapped org.springframework.hateoas.Link 클래스를 사용합니다.</p><ol class="list _decimal" id="fax9io_146" type="1" start="3"><li class="list__item" id="fax9io_147"><p>OpenAPI Generator ignore 파일 생성</p></li></ol><div class="code-block" data-lang="none">
+
+**/*Controller.java
+
+</div><p id="fax9io_150">컨트롤러 파일은 직접 생성할겁니다. 생성시 제외시킵시다.</p><ol class="list _decimal" id="fax9io_151" type="1" start="4"><li class="list__item" id="fax9io_152"><p>openapi.yaml 파일을 프로젝트의 <code class="code" id="fax9io_153">/src/main/resources/api</code> 폴더에 추가하세요.</p></li></ol><ul class="list _bullet" id="fax9io_154"><li class="list__item" id="fax9io_155"><p>openapi.yaml</p></li></ul><div class="code-collapse" data-lang="yaml" data-is-expanded="false" data-synopsis="openapi: 3.0.3">
+
+openapi: 3.0.3
+info:
+  title: Sample Ecommerce App
+  description: &gt;
+    'This is a ***sample ecommerce app API***.  You can find out more about Swagger at [swagger.io](http://swagger.io).
+    Description supports markdown markup. For example, you can use the `inline code` using back ticks.'
+  termsOfService: https://opensource.org/license/mit
+  contact:
+    email: support@infosiatec.com
+  license:
+    name: MIT
+    url: https://opensource.org/license/mit
+  version: 1.0.0
+externalDocs:
+  description: Any document link you want to generate along with API.
+  url: http://swagger.io
+servers:
+  - url: https://ecommerce.swagger.io/v2
+tags:
+  - name: cart
+    description: Everything about cart
+    externalDocs:
+      description: Find out more (extra document link)
+      url: http://swagger.io
+  - name: order
+    description: Operation about orders
+  - name: customer
+    description: Operations about user's persona customer
+  - name: address
+    description: Operations about user's address
+  - name: payment
+    description: Operations about payments
+  - name: shipment
+    description: Operations about shippings
+  - name: product
+    description: Operations about products
+
+
+paths:
+  /api/v1/carts/{customerId}:
+    get:
+      tags:
+        - cart
+      summary: Returns the shopping cart
+      description: Returns the shopping cart of given customer
+      operationId: getCartByCustomerId
+      parameters:
+        - name: customerId
+          in: path
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Cart'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        404:
+          description: Given customer ID doesn't exist
+          content: {}
+    delete:
+      tags:
+        - cart
+      summary: Delete the shopping cart
+      description: Deletes the shopping cart of given customer
+      operationId: deleteCart
+      parameters:
+        - name: customerId
+          in: path
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: successful operation
+        404:
+          description: Given customer ID doesn't exist
+          content: {}
+  /api/v1/carts/{customerId}/items:
+    get:
+      tags:
+        - cart
+      summary: Returns the list of products in user's shopping cart
+      description: Returns the items in shopping cart of given customer
+      operationId: getCartItemsByCustomerId
+      parameters:
+        - name: customerId
+          in: path
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+        404:
+          description: Given customer ID doesn't exist
+          content: {}
+    post:
+      tags:
+        - cart
+      summary: Adds an item in shopping cart
+      description: Adds an item to the shopping cart if it doesn't already exist, or increment quantity by the specified number of items if it does.
+      operationId: addCartItemsByCustomerId
+      parameters:
+        - name: customerId
+          in: path
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Item object
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Item'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        201:
+          description: Item added successfully
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+        404:
+          description: Given customer ID doesn't exist
+          content: {}
+    put:
+      tags:
+        - cart
+      summary: Replace/add an item in shopping cart
+      description: Adds an item to the shopping cart if it doesn't already exist, or replace with given item if it does.
+      operationId: addOrReplaceItemsByCustomerId
+      parameters:
+        - name: customerId
+          in: path
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Item object
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Item'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        201:
+          description: Item added successfully
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+        404:
+          description: Given customer ID doesn't exist
+          content: {}
+  /api/v1/carts/{customerId}/items/{itemId}:
+    get:
+      tags:
+        - cart
+      summary: Returns given item from user's shopping cart
+      description: Returns given item from shopping cart of given customer
+      operationId: getCartItemsByItemId
+      parameters:
+        - name: customerId
+          in: path
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+        - name: itemId
+          in: path
+          description: Item (product) Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: If item exists in cart
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Item'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        404:
+          description: Given item (product) ID doesn't exist
+          content: {}
+    delete:
+      tags:
+        - cart
+      summary: Delete the item from shopping cart
+      description: Deletes the item from shopping cart of given customer
+      operationId: deleteItemFromCart
+      parameters:
+        - name: customerId
+          in: path
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+        - name: itemId
+          in: path
+          description: Item (product) Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        202:
+          description: Accepts the request, regardless of whether the specified item exists in the cart or not.
+  /api/v1/orders:
+    post:
+      tags:
+        - order
+      summary:  Creates a new order for the given order request
+      description: Creates a new order for the given order request.
+      operationId: addOrder
+      requestBody:
+        description: New Order Request object
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/NewOrder'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewOrder'
+      responses:
+        201:
+          description: Order added successfully
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Order'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        406:
+          description: If payment is not authorized.
+          content: {}
+    get:
+      tags:
+        - order
+      summary: Returns the orders of given user
+      description: Returns orders of given user
+      operationId: getOrdersByCustomerId
+      parameters:
+        - name: customerId
+          in: query
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: If order exists.
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        404:
+          description: Order doesn't exist for given user.
+          content: {}
+  /api/v1/orders/{id}:
+    get:
+      tags:
+        - order
+      summary: Returns the order of given order ID
+      description: Returns orders of given order ID
+      operationId: getByOrderId
+      parameters:
+        - name: id
+          in: path
+          description: Order Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: If order exists.
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Order'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        404:
+          description: Order doesn't exist for given user.
+          content: {}
+  /api/v1/customers:
+    get:
+      tags:
+        - customer
+      summary: Returns all customers
+      description: Returns all customers, or empty collection if no use found
+      operationId: getAllCustomers
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /api/v1/customers/{id}:
+    get:
+      tags:
+        - customer
+      summary: Returns a customer
+      description: Returns a customers identifiable by given ID
+      operationId: getCustomerById
+      parameters:
+        - name: id
+          in: path
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      tags:
+        - customer
+      summary: Deletes the customer
+      description: Deletes the customer identifiable by given ID
+      operationId: deleteCustomerById
+      parameters:
+        - name: id
+          in: path
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        202:
+          description: Request accepted, returns this status even if user does not exist
+          content: {}
+  /api/v1/customers/{id}/cards:
+    get:
+      tags:
+        - customer
+      summary: Returns all customer's cards
+      description: Returns all customer's cards based on given customer ID
+      operationId: getCardByCustomerId
+      parameters:
+        - name: id
+          in: path
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Card'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+  /api/v1/customers/{id}/addresses:
+    get:
+      tags:
+        - customer
+      summary: Returns all customer's addresses
+      description: Returns all customer's addresses based on given customer ID
+      operationId: getAddressesByCustomerId
+      parameters:
+        - name: id
+          in: path
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Address'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+  /api/v1/addresses:
+    get:
+      tags:
+        - address
+      summary: Returns all user's addresses
+      description: Returns all user's addresses, else empty collection
+      operationId: getAllAddresses
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Address'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Address'
+    post:
+      tags:
+        - address
+      summary: Creates a new user addresses
+      description: Creates a new user addresses. Does nothing if address already exists.
+      operationId: createAddress
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/AddAddressReq'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAddressReq'
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Address'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+  /api/v1/addresses/{id}:
+    get:
+      tags:
+        - address
+      summary: Returns user's address
+      description: Returns user's address based on given address ID.
+      operationId: getAddressesById
+      parameters:
+        - name: id
+          in: path
+          description: address Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Address'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+    delete:
+      tags:
+        - address
+      summary: Deletes user's address
+      description: Deletes user's address based on given address ID.
+      operationId: deleteAddressesById
+      parameters:
+        - name: id
+          in: path
+          description: address Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        202:
+          description: Accepts the deletion request and perform deletion. If ID does not exist, does nothing.
+          content: {}
+  /api/v1/cards:
+    get:
+      tags:
+        - card
+      summary: Returns all user's cards
+      description: Returns all user's cards, else empty collection
+      operationId: getAllCards
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card'
+    post:
+      tags:
+        - card
+      summary: Creates a new user addresses
+      description: Creates a new user addresses. Does nothing if address already exists.
+      operationId: registerCard
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/AddCardReq'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCardReq'
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Card'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+  /api/v1/cards/{id}:
+    get:
+      tags:
+        - card
+      summary: Returns user's card
+      description: Returns user's card based on given card ID.
+      operationId: getCardById
+      parameters:
+        - name: id
+          in: path
+          description: card Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Card'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+    delete:
+      tags:
+        - card
+      summary: Deletes card's address
+      description: Deletes card's address based on given card ID.
+      operationId: deleteCardById
+      parameters:
+        - name: id
+          in: path
+          description: card Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        202:
+          description: Accepts the deletion request and perform deletion. If ID does not exist, does nothing.
+          content: {}
+  /api/v1/payments:
+    post:
+      tags:
+        - payment
+      summary: Authorize a payment request
+      description: Authorize a payment request.
+      operationId: authorize
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/PaymentReq'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentReq'
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+    get:
+      tags:
+        - payment
+      summary: Returns the payment authorization
+      description: Return the payment authorization for the specified order
+      operationId: getOrdersPaymentAuthorization
+      parameters:
+        - name: orderId
+          in: query
+          description: Order Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+  /api/v1/shipping:
+    post:
+      tags:
+        - shipping
+      summary: Ship the specified shipping request
+      description: Ship the specified shipping request
+      operationId: shipOrder
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/ShippingReq'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShippingReq'
+      responses:
+        201:
+          description: For successful post.
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+  /api/v1/shipping/{id}:
+    get:
+      tags:
+        - shipment
+      summary: Return the Shipment
+      description: Return the Shipment for the specified order
+      operationId: getShipmentByOrderId
+      parameters:
+        - name: id
+          in: path
+          description: Order Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Shipment'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Shipment'
+  /api/v1/products:
+    get:
+      tags:
+        - product
+      summary: Returns all the matched products
+      description: Returns the products that matches the given query criteria
+      operationId: queryProducts
+      parameters:
+        - name: tag
+          in: query
+          description: Product tag
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: Product name
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Query page number
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 1
+        - name: size
+          in: query
+          description: Query page size
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+  /api/v1/products/{id}:
+    get:
+      tags:
+        - product
+      summary: Returns a product
+      description: Returns the product that matches the given product ID
+      operationId: getProduct
+      parameters:
+        - name: id
+          in: path
+          description: Product Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: For successful fetch.
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Product'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+components:
+  schemas:
+    Cart:
+      description: Shopping Cart of the user
+      type: object
+      properties:
+        id:
+          description: Cart Identifier
+          type: string
+        customerId:
+          description: Id of the customer who possesses the cart
+          type: string
+        items:
+          description: Collection of items in cart.
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+    Item:
+      description: Items in shopping cart
+      type: object
+      properties:
+        id:
+          description: Item Identifier
+          type: string
+        quantity:
+          description: The item quantity
+          type: integer
+          format: int32
+        unitPrice:
+          description: The item's price per unit
+          $ref: '#/components/schemas/BigDecimal'
+    Order:
+      description: Represents an order
+      type: object
+      properties:
+        id:
+          description: Order identifier
+          type: string
+        customer:
+          $ref: '#/components/schemas/User'
+        address:
+          $ref: '#/components/schemas/Address'
+        card:
+          $ref: '#/components/schemas/Card'
+        date:
+          description: Order's data and time details
+          type: string
+          format: date-time
+        items:
+          description: Collection of order items.
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+        total:
+          description: Order total
+          $ref: '#/components/schemas/BigDecimal'
+        payment:
+          $ref: '#/components/schemas/Payment'
+        shipment:
+          $ref: '#/components/schemas/Shipment'
+        status:
+          description: Order Status
+          type: string
+          enum:
+            - CREATED
+            - PAID
+            - SHIPPED
+            - PAYMENT_FAILED
+            - SHIPMENT_FAILED
+            - COMPLETED
+      xml:
+        name: Order
+    AddAddressReq:
+      allOf:
+        - $ref: '#/components/schemas/Address'
+        - type: object
+          properties:
+            userId:
+              type: string
+
+      xml:
+        name: AddAddressReq
+    Address:
+      type: object
+      properties:
+        id:
+          description: Order identifier
+          type: string
+        number:
+          description: house of flat number
+          type: string
+        residency:
+          description: Socieity or building name
+          type: string
+        street:
+          description: street name
+          type: string
+        city:
+          description: city name
+          type: string
+        state:
+          description: state name
+          type: string
+        country:
+          description: country name
+          type: string
+        pincode:
+          description: postal code
+          type: string
+      xml:
+        name: Address
+    Card:
+      type: object
+      properties:
+        id:
+          description: Order identifier
+          type: string
+        cardNumber:
+          description: Card Number
+          type: string
+        expires:
+          description: Expiration date
+          type: string
+        cvv:
+          description: CVV code
+          type: string
+        userId:
+          type: string
+      xml:
+        name: Card
+    AddCardReq:
+      description: Request object for new card registration.
+      allOf:
+        - $ref: '#/components/schemas/Card'
+        - type: object
+          properties:
+            userId:
+              type: string
+      xml:
+        name: AddCardReq
+    Payment:
+      type: object
+      properties:
+        id:
+          description: Order identifier
+          type: string
+        authorized:
+          description: Flag that specified whether payment is authorized or not
+          type: boolean
+        message:
+          description: Approval or rejection message
+          type: string
+      xml:
+        name: Payment
+    Shipment:
+      type: object
+      properties:
+        id:
+          description: Shipment Identifier
+          type: string
+        carrier:
+          description: Shipping Carrier
+          type: string
+        trackingNumber:
+          description: Shipping Tracking Number
+          type: string
+        estDeliveryDate:
+          description: Estimated Delivery Date
+          type: string
+          format: date
+      xml:
+        name: Shipment
+    ShippingReq:
+      description: Contains information required for Shipping request
+      type: object
+      properties:
+        orderId:
+          description: Order Identifier
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        itemCount:
+          description: The number of items in the order
+          type: integer
+          format: int32
+      xml:
+        name: ShippingReq
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: string
+        userStatus:
+          type: string
+      xml:
+        name: User
+    NewOrder:
+      description: Contains the new order request information
+      type: object
+      properties:
+        customerId:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        card:
+          $ref: '#/components/schemas/Card'
+        items:
+          description: Items in shopping cart
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+      xml:
+        name: NewOrder
+    URI:
+      type: object
+      xml:
+        name: URI
+    BigDecimal:
+      type: BigDecimal
+    Authorization:
+      type: object
+      properties:
+        orderId:
+          description: Order Identification
+          type: string
+        time:
+          description: Timestamp when this authorization was created
+          type: string
+          format: date-time
+        authorized:
+          description: Flat that specify whether the payment is authorized
+          type: boolean
+        message:
+          description: Approavl or rejection message
+          type: string
+        error:
+          description: Processing error description, if any
+          type: string
+      xml:
+        name: Authorization
+    PaymentReq:
+      description: Contains the payment request information
+      type: object
+      properties:
+        orderId:
+          description: Order Identifier
+          type: string
+        customer:
+          $ref: '#/components/schemas/CustomerInfoOnCard'
+        address:
+          $ref: '#/components/schemas/Address'
+        card:
+          $ref: '#/components/schemas/Card'
+        amount:
+          description: Payment amount
+          $ref: '#/components/schemas/BigDecimal'
+      xml:
+        name: PaymentReq
+    CustomerInfoOnCard:
+      description: Customer information required for payment processing
+      type: object
+      properties:
+        firstName:
+          description: Customer first name
+          type: string
+        lastName:
+          description: Customer last name
+          type: string
+      xml:
+        name: CustomerInfoOnCard
+    Product:
+      description: Product information
+      type: object
+      properties:
+        id:
+          description: Product identifier
+          type: string
+        name:
+          description: Product Name
+          type: string
+        description:
+          description: Prodcut's description
+          type: string
+        imageUrl:
+          description: Product image's URL
+          type: string
+        price:
+          description: Product price
+          $ref: '#/components/schemas/BigDecimal'
+        count:
+          description: Product count
+          type: integer
+          format: int32
+        tag:
+          description: Tags associated with the product
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+    Tag:
+      description: Tag information
+      type: object
+      properties:
+        id:
+          description: Tag identifier
+          type: string
+        name:
+          description: Tag Name
+          type: string
+
+</div><ol class="list _decimal" id="fax9io_158" type="1" start="5"><li class="list__item" id="fax9io_159"><p>swaggerSources 태스크를 그래이들 build.gradle 파일에 추가하세요.</p></li></ol><div class="code-block" data-lang="gradle">
+
+swaggerSources {
+    def typeMappings = 'URI=URI'
+    def importMappings = 'URI=java.net.URI'
+    eStore {
+        def apiYaml = &quot;${rootDir}/src/main/resources/api/openapi.yaml&quot;
+        def configJson = &quot;${rootDir}/src/main/resources/api/config.json&quot;
+        inputFile = file(apiYaml)
+        def ignoreFile = file(&quot;${rootDir}/src/main/resources/api/.openapi-generator-ignore&quot;)
+        code {
+            language = 'spring'
+            configFile = file(configJson)
+            rawOptions = ['--ignore-file-override', ignoreFile, '--type-mappings',
+                          typeMappings, '--import-mappings', importMappings] as List&lt;String&gt;
+            components = [models: true, apis: true, supportingFiles: 'ApiUtil.java']
+            // dependsOn validation
+        }
+    }
+}
+
+</div><ul class="list _bullet" id="fax9io_162"><li class="list__item" id="fax9io_163"><p>typeMappings와 importMappings: OpenAPI 명세서의 타입을 Java 타입으로 매핑합니다. 여기서는 URI 타입을 java.net.URI로 매핑하고 있습니다.</p></li><li class="list__item" id="fax9io_164"><p>eStore: Swagger 소스의 사용자 정의 이름입니다. 여러 OpenAPI 명세서가 있는 경우 여러 소스를 정의할 수 있습니다.</p></li><li class="list__item" id="fax9io_165"><p>apiYaml과 configJson: OpenAPI 명세서와 코드 생성을 위한 설정 파일의 경로입니다.</p></li><li class="list__item" id="fax9io_166"><p>inputFile: 코드가 생성될 OpenAPI 명세서 파일입니다.</p></li><li class="list__item" id="fax9io_167"><p>ignoreFile: 코드 생성 중 무시할 파일을 나열한 파일입니다.</p></li><li class="list__item" id="fax9io_168"><p>code: 코드 생성을 설정하는 블록입니다. spring 언어를 설정하고, 설정 파일을 지정하고, 몇 가지 옵션을 설정하며, 생성할 컴포넌트(models, apis, 그리고 ApiUtil 지원 파일)를 정의합니다.</p></li><li class="list__item" id="fax9io_169"><p>dependsOn validation: 코드 생성 작업이 검증 작업에 의존하도록 만드는 옵션입니다. 검증 작업이 코드 생성 이전에 실행되도록 합니다.</p></li></ul><p id="fax9io_170">이 설정을 통해 Gradle 작업이 실행될 때 OpenAPI 명세서에서 Spring Boot 코드가 생성됩니다.</p><ol class="list _decimal" id="fax9io_171" type="1" start="6"><li class="list__item" id="fax9io_172"><p>compileJava 태스크에 swaggerSources를 추가하세요.</p></li></ol><div class="code-block" data-lang="gradle">
+
+compileJava.dependsOn swaggerSources.eStore.code
+
+</div><p id="fax9io_175">추가로 generateSwaggerCode 작업을 processResources 작업의 종속 항목으로 추가해야 합니다.</p><div class="code-block" data-lang="gradle">
+
+processResources {
+    dependsOn(generateSwaggerCode)
+}
+
+</div><ol class="list _decimal" id="fax9io_178" type="1" start="7"><li class="list__item" id="fax9io_179"><p>Gradle sourceSets에 생성될 소스 디렉토리를 추가하세요.</p></li></ol><div class="code-block" data-lang="gradle">
+
+sourceSets.main.java.srcDir &quot;${swaggerSources.eStore.code.outputDir}/src/main/java&quot;
+sourceSets.main.resources.srcDir &quot;${swaggerSources.eStore.code.outputDir}/src/main/resources&quot;
+
+</div><p id="fax9io_182">소스 코드는 프로젝트의 /build 디렉토리에 생성됩니다. 예를 들어 Chapter03\build\swagger-code-eStore와 같이 생성됩니다. 생성된 소스 코드와 리소스를 Gradle sourceSets에 추가하는 작업입니다.</p><p id="fax9io_183">Swagger Codegen 유틸리티를 사용하여 API Java 인터페이스와 모델을 생성했습니다. 따라서 IDE에서 프로젝트를 처음으로 로드할 때 빌드를 실행하지 않으면 IDE가 생성된 Java 파일(모델 및 API Java 인터페이스)을 찾지 못해 오류가 발생할 수 있습니다. 이러한 파일을 생성하려면 빌드의 gradlew clean build 명령을 실행할 수 있습니다.</p><ol class="list _decimal" id="fax9io_184" type="1" start="8"><li class="list__item" id="fax9io_185"><p>프로젝트를 빌드하세요.</p></li></ol><div class="code-block" data-lang="bash">
+
+./gradlew clean build
+
+</div><figure id="fax9io_188"><img alt="build.png" src="images/build.png" title="build.png" width="231" height="489"></figure><p id="fax9io_189">이게 끝이에요. 이제 생성된 코드를 살펴보겠습니다.</p><div class="code-collapse" data-lang="java" data-is-expanded="false" data-synopsis="/**">
+
+/**
+ * NOTE: This class is auto generated by OpenAPI Generator (https://openapi-generator.tech) (7.6.0).
+ * https://openapi-generator.tech
+ * Do not edit the class manually.
+ */
+package com.infosiatec.modern.api;
+
+import com.infosiatec.modern.api.model.Cart;
+import com.infosiatec.modern.api.model.Item;
+import io.swagger.v3.oas.annotations.ExternalDocumentation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.multipart.MultipartFile;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import jakarta.annotation.Generated;
+
+@Generated(value = &quot;org.openapitools.codegen.languages.SpringCodegen&quot;, comments = &quot;Generator version: 7.6.0&quot;)
+@Validated
+@Tag(name = &quot;cart&quot;, description = &quot;Everything about cart&quot;)
+public interface CartApi {
+
+    default Optional&lt;NativeWebRequest&gt; getRequest() {
+        return Optional.empty();
+    }
+
+    /**
+     * POST /api/v1/carts/{customerId}/items : Adds an item in shopping cart
+     * Adds an item to the shopping cart if it doesn&amp;#39;t already exist, or increment quantity by the specified number of items if it does.
+     *
+     * @param customerId Customer Identifier (required)
+     * @param item Item object (optional)
+     * @return Item added successfully (status code 201)
+     *         or Given customer ID doesn&amp;#39;t exist (status code 404)
+     */
+    @Operation(
+        operationId = &quot;addCartItemsByCustomerId&quot;,
+        summary = &quot;Adds an item in shopping cart&quot;,
+        description = &quot;Adds an item to the shopping cart if it doesn't already exist, or increment quantity by the specified number of items if it does.&quot;,
+        tags = { &quot;cart&quot; },
+        responses = {
+            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Item added successfully&quot;, content = {
+                @Content(mediaType = &quot;application/xml&quot;, array = @ArraySchema(schema = @Schema(implementation = Item.class))),
+                @Content(mediaType = &quot;application/json&quot;, array = @ArraySchema(schema = @Schema(implementation = Item.class)))
+            }),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Given customer ID doesn't exist&quot;)
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.POST,
+        value = &quot;/api/v1/carts/{customerId}/items&quot;,
+        produces = { &quot;application/xml&quot;, &quot;application/json&quot; },
+        consumes = { &quot;application/xml&quot;, &quot;application/json&quot; }
+    )
+    
+    default ResponseEntity&lt;List&lt;Item&gt;&gt; addCartItemsByCustomerId(
+        @Parameter(name = &quot;customerId&quot;, description = &quot;Customer Identifier&quot;, required = true, in = ParameterIn.PATH) @PathVariable(&quot;customerId&quot;) String customerId,
+        @Parameter(name = &quot;Item&quot;, description = &quot;Item object&quot;) @Valid @RequestBody(required = false) Item item
+    ) throws Exception {
+        getRequest().ifPresent(request -&gt; {
+            for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader(&quot;Accept&quot;))) {
+                if (mediaType.isCompatibleWith(MediaType.valueOf(&quot;application/json&quot;))) {
+                    String exampleString = &quot;[ { \&quot;unitPrice\&quot; : 6.027456183070403, \&quot;quantity\&quot; : 0, \&quot;id\&quot; : \&quot;id\&quot; }, { \&quot;unitPrice\&quot; : 6.027456183070403, \&quot;quantity\&quot; : 0, \&quot;id\&quot; : \&quot;id\&quot; } ]&quot;;
+                    ApiUtil.setExampleResponse(request, &quot;application/json&quot;, exampleString);
+                    break;
+                }
+                if (mediaType.isCompatibleWith(MediaType.valueOf(&quot;application/xml&quot;))) {
+                    String exampleString = &quot;&lt;Item&gt; &lt;id&gt;aeiou&lt;/id&gt; &lt;quantity&gt;123&lt;/quantity&gt; &lt;unitPrice&gt;3.149&lt;/unitPrice&gt; &lt;/Item&gt;&quot;;
+                    ApiUtil.setExampleResponse(request, &quot;application/xml&quot;, exampleString);
+                    break;
+                }
+            }
+        });
+        return new ResponseEntity&lt;&gt;(HttpStatus.NOT_IMPLEMENTED);
+
+    }
+
+
+    /**
+     * PUT /api/v1/carts/{customerId}/items : Replace/add an item in shopping cart
+     * Adds an item to the shopping cart if it doesn&amp;#39;t already exist, or replace with given item if it does.
+     *
+     * @param customerId Customer Identifier (required)
+     * @param item Item object (optional)
+     * @return Item added successfully (status code 201)
+     *         or Given customer ID doesn&amp;#39;t exist (status code 404)
+     */
+    @Operation(
+        operationId = &quot;addOrReplaceItemsByCustomerId&quot;,
+        summary = &quot;Replace/add an item in shopping cart&quot;,
+        description = &quot;Adds an item to the shopping cart if it doesn't already exist, or replace with given item if it does.&quot;,
+        tags = { &quot;cart&quot; },
+        responses = {
+            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Item added successfully&quot;, content = {
+                @Content(mediaType = &quot;application/xml&quot;, array = @ArraySchema(schema = @Schema(implementation = Item.class))),
+                @Content(mediaType = &quot;application/json&quot;, array = @ArraySchema(schema = @Schema(implementation = Item.class)))
+            }),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Given customer ID doesn't exist&quot;)
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.PUT,
+        value = &quot;/api/v1/carts/{customerId}/items&quot;,
+        produces = { &quot;application/xml&quot;, &quot;application/json&quot; },
+        consumes = { &quot;application/xml&quot;, &quot;application/json&quot; }
+    )
+    
+    default ResponseEntity&lt;List&lt;Item&gt;&gt; addOrReplaceItemsByCustomerId(
+        @Parameter(name = &quot;customerId&quot;, description = &quot;Customer Identifier&quot;, required = true, in = ParameterIn.PATH) @PathVariable(&quot;customerId&quot;) String customerId,
+        @Parameter(name = &quot;Item&quot;, description = &quot;Item object&quot;) @Valid @RequestBody(required = false) Item item
+    ) throws Exception {
+        getRequest().ifPresent(request -&gt; {
+            for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader(&quot;Accept&quot;))) {
+                if (mediaType.isCompatibleWith(MediaType.valueOf(&quot;application/json&quot;))) {
+                    String exampleString = &quot;[ { \&quot;unitPrice\&quot; : 6.027456183070403, \&quot;quantity\&quot; : 0, \&quot;id\&quot; : \&quot;id\&quot; }, { \&quot;unitPrice\&quot; : 6.027456183070403, \&quot;quantity\&quot; : 0, \&quot;id\&quot; : \&quot;id\&quot; } ]&quot;;
+                    ApiUtil.setExampleResponse(request, &quot;application/json&quot;, exampleString);
+                    break;
+                }
+                if (mediaType.isCompatibleWith(MediaType.valueOf(&quot;application/xml&quot;))) {
+                    String exampleString = &quot;&lt;null&gt; &lt;id&gt;aeiou&lt;/id&gt; &lt;quantity&gt;123&lt;/quantity&gt; &lt;unitPrice&gt;3.149&lt;/unitPrice&gt; &lt;/null&gt;&quot;;
+                    ApiUtil.setExampleResponse(request, &quot;application/xml&quot;, exampleString);
+                    break;
+                }
+            }
+        });
+        return new ResponseEntity&lt;&gt;(HttpStatus.NOT_IMPLEMENTED);
+
+    }
+
+
+    /**
+     * DELETE /api/v1/carts/{customerId} : Delete the shopping cart
+     * Deletes the shopping cart of given customer
+     *
+     * @param customerId Customer Identifier (required)
+     * @return successful operation (status code 204)
+     *         or Given customer ID doesn&amp;#39;t exist (status code 404)
+     */
+    @Operation(
+        operationId = &quot;deleteCart&quot;,
+        summary = &quot;Delete the shopping cart&quot;,
+        description = &quot;Deletes the shopping cart of given customer&quot;,
+        tags = { &quot;cart&quot; },
+        responses = {
+            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;successful operation&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Given customer ID doesn't exist&quot;)
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.DELETE,
+        value = &quot;/api/v1/carts/{customerId}&quot;
+    )
+    
+    default ResponseEntity&lt;Void&gt; deleteCart(
+        @Parameter(name = &quot;customerId&quot;, description = &quot;Customer Identifier&quot;, required = true, in = ParameterIn.PATH) @PathVariable(&quot;customerId&quot;) String customerId
+    ) throws Exception {
+        return new ResponseEntity&lt;&gt;(HttpStatus.NOT_IMPLEMENTED);
+
+    }
+
+
+    /**
+     * DELETE /api/v1/carts/{customerId}/items/{itemId} : Delete the item from shopping cart
+     * Deletes the item from shopping cart of given customer
+     *
+     * @param customerId Customer Identifier (required)
+     * @param itemId Item (product) Identifier (required)
+     * @return Accepts the request, regardless of whether the specified item exists in the cart or not. (status code 202)
+     */
+    @Operation(
+        operationId = &quot;deleteItemFromCart&quot;,
+        summary = &quot;Delete the item from shopping cart&quot;,
+        description = &quot;Deletes the item from shopping cart of given customer&quot;,
+        tags = { &quot;cart&quot; },
+        responses = {
+            @ApiResponse(responseCode = &quot;202&quot;, description = &quot;Accepts the request, regardless of whether the specified item exists in the cart or not.&quot;)
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.DELETE,
+        value = &quot;/api/v1/carts/{customerId}/items/{itemId}&quot;
+    )
+    
+    default ResponseEntity&lt;Void&gt; deleteItemFromCart(
+        @Parameter(name = &quot;customerId&quot;, description = &quot;Customer Identifier&quot;, required = true, in = ParameterIn.PATH) @PathVariable(&quot;customerId&quot;) String customerId,
+        @Parameter(name = &quot;itemId&quot;, description = &quot;Item (product) Identifier&quot;, required = true, in = ParameterIn.PATH) @PathVariable(&quot;itemId&quot;) String itemId
+    ) throws Exception {
+        return new ResponseEntity&lt;&gt;(HttpStatus.NOT_IMPLEMENTED);
+
+    }
+
+
+    /**
+     * GET /api/v1/carts/{customerId} : Returns the shopping cart
+     * Returns the shopping cart of given customer
+     *
+     * @param customerId Customer Identifier (required)
+     * @return successful operation (status code 200)
+     *         or Given customer ID doesn&amp;#39;t exist (status code 404)
+     */
+    @Operation(
+        operationId = &quot;getCartByCustomerId&quot;,
+        summary = &quot;Returns the shopping cart&quot;,
+        description = &quot;Returns the shopping cart of given customer&quot;,
+        tags = { &quot;cart&quot; },
+        responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;successful operation&quot;, content = {
+                @Content(mediaType = &quot;application/xml&quot;, array = @ArraySchema(schema = @Schema(implementation = Cart.class))),
+                @Content(mediaType = &quot;application/json&quot;, array = @ArraySchema(schema = @Schema(implementation = Cart.class)))
+            }),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Given customer ID doesn't exist&quot;)
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = &quot;/api/v1/carts/{customerId}&quot;,
+        produces = { &quot;application/xml&quot;, &quot;application/json&quot; }
+    )
+    
+    default ResponseEntity&lt;List&lt;Cart&gt;&gt; getCartByCustomerId(
+        @Parameter(name = &quot;customerId&quot;, description = &quot;Customer Identifier&quot;, required = true, in = ParameterIn.PATH) @PathVariable(&quot;customerId&quot;) String customerId
+    ) throws Exception {
+        getRequest().ifPresent(request -&gt; {
+            for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader(&quot;Accept&quot;))) {
+                if (mediaType.isCompatibleWith(MediaType.valueOf(&quot;application/json&quot;))) {
+                    String exampleString = &quot;[ { \&quot;customerId\&quot; : \&quot;customerId\&quot;, \&quot;items\&quot; : [ { \&quot;unitPrice\&quot; : 6.027456183070403, \&quot;quantity\&quot; : 0, \&quot;id\&quot; : \&quot;id\&quot; }, { \&quot;unitPrice\&quot; : 6.027456183070403, \&quot;quantity\&quot; : 0, \&quot;id\&quot; : \&quot;id\&quot; } ] }, { \&quot;customerId\&quot; : \&quot;customerId\&quot;, \&quot;items\&quot; : [ { \&quot;unitPrice\&quot; : 6.027456183070403, \&quot;quantity\&quot; : 0, \&quot;id\&quot; : \&quot;id\&quot; }, { \&quot;unitPrice\&quot; : 6.027456183070403, \&quot;quantity\&quot; : 0, \&quot;id\&quot; : \&quot;id\&quot; } ] } ]&quot;;
+                    ApiUtil.setExampleResponse(request, &quot;application/json&quot;, exampleString);
+                    break;
+                }
+                if (mediaType.isCompatibleWith(MediaType.valueOf(&quot;application/xml&quot;))) {
+                    String exampleString = &quot;&lt;null&gt; &lt;customerId&gt;aeiou&lt;/customerId&gt; &lt;/null&gt;&quot;;
+                    ApiUtil.setExampleResponse(request, &quot;application/xml&quot;, exampleString);
+                    break;
+                }
+            }
+        });
+        return new ResponseEntity&lt;&gt;(HttpStatus.NOT_IMPLEMENTED);
+
+    }
+
+
+    /**
+     * GET /api/v1/carts/{customerId}/items : Returns the list of products in user&amp;#39;s shopping cart
+     * Returns the items in shopping cart of given customer
+     *
+     * @param customerId Customer Identifier (required)
+     * @return successful operation (status code 200)
+     *         or Given customer ID doesn&amp;#39;t exist (status code 404)
+     */
+    @Operation(
+        operationId = &quot;getCartItemsByCustomerId&quot;,
+        summary = &quot;Returns the list of products in user's shopping cart&quot;,
+        description = &quot;Returns the items in shopping cart of given customer&quot;,
+        tags = { &quot;cart&quot; },
+        responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;successful operation&quot;, content = {
+                @Content(mediaType = &quot;application/xml&quot;, array = @ArraySchema(schema = @Schema(implementation = Item.class))),
+                @Content(mediaType = &quot;application/json&quot;, array = @ArraySchema(schema = @Schema(implementation = Item.class)))
+            }),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Given customer ID doesn't exist&quot;)
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = &quot;/api/v1/carts/{customerId}/items&quot;,
+        produces = { &quot;application/xml&quot;, &quot;application/json&quot; }
+    )
+    
+    default ResponseEntity&lt;List&lt;Item&gt;&gt; getCartItemsByCustomerId(
+        @Parameter(name = &quot;customerId&quot;, description = &quot;Customer Identifier&quot;, required = true, in = ParameterIn.PATH) @PathVariable(&quot;customerId&quot;) String customerId
+    ) throws Exception {
+        getRequest().ifPresent(request -&gt; {
+            for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader(&quot;Accept&quot;))) {
+                if (mediaType.isCompatibleWith(MediaType.valueOf(&quot;application/json&quot;))) {
+                    String exampleString = &quot;[ { \&quot;unitPrice\&quot; : 6.027456183070403, \&quot;quantity\&quot; : 0, \&quot;id\&quot; : \&quot;id\&quot; }, { \&quot;unitPrice\&quot; : 6.027456183070403, \&quot;quantity\&quot; : 0, \&quot;id\&quot; : \&quot;id\&quot; } ]&quot;;
+                    ApiUtil.setExampleResponse(request, &quot;application/json&quot;, exampleString);
+                    break;
+                }
+                if (mediaType.isCompatibleWith(MediaType.valueOf(&quot;application/xml&quot;))) {
+                    String exampleString = &quot;&lt;null&gt; &lt;id&gt;aeiou&lt;/id&gt; &lt;quantity&gt;123&lt;/quantity&gt; &lt;unitPrice&gt;3.149&lt;/unitPrice&gt; &lt;/null&gt;&quot;;
+                    ApiUtil.setExampleResponse(request, &quot;application/xml&quot;, exampleString);
+                    break;
+                }
+            }
+        });
+        return new ResponseEntity&lt;&gt;(HttpStatus.NOT_IMPLEMENTED);
+
+    }
+
+
+    /**
+     * GET /api/v1/carts/{customerId}/items/{itemId} : Returns given item from user&amp;#39;s shopping cart
+     * Returns given item from shopping cart of given customer
+     *
+     * @param customerId Customer Identifier (required)
+     * @param itemId Item (product) Identifier (required)
+     * @return If item exists in cart (status code 200)
+     *         or Given item (product) ID doesn&amp;#39;t exist (status code 404)
+     */
+    @Operation(
+        operationId = &quot;getCartItemsByItemId&quot;,
+        summary = &quot;Returns given item from user's shopping cart&quot;,
+        description = &quot;Returns given item from shopping cart of given customer&quot;,
+        tags = { &quot;cart&quot; },
+        responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;If item exists in cart&quot;, content = {
+                @Content(mediaType = &quot;application/xml&quot;, array = @ArraySchema(schema = @Schema(implementation = Item.class))),
+                @Content(mediaType = &quot;application/json&quot;, array = @ArraySchema(schema = @Schema(implementation = Item.class)))
+            }),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Given item (product) ID doesn't exist&quot;)
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = &quot;/api/v1/carts/{customerId}/items/{itemId}&quot;,
+        produces = { &quot;application/xml&quot;, &quot;application/json&quot; }
+    )
+    
+    default ResponseEntity&lt;List&lt;Item&gt;&gt; getCartItemsByItemId(
+        @Parameter(name = &quot;customerId&quot;, description = &quot;Customer Identifier&quot;, required = true, in = ParameterIn.PATH) @PathVariable(&quot;customerId&quot;) String customerId,
+        @Parameter(name = &quot;itemId&quot;, description = &quot;Item (product) Identifier&quot;, required = true, in = ParameterIn.PATH) @PathVariable(&quot;itemId&quot;) String itemId
+    ) throws Exception {
+        getRequest().ifPresent(request -&gt; {
+            for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader(&quot;Accept&quot;))) {
+                if (mediaType.isCompatibleWith(MediaType.valueOf(&quot;application/json&quot;))) {
+                    String exampleString = &quot;[ { \&quot;unitPrice\&quot; : 6.027456183070403, \&quot;quantity\&quot; : 0, \&quot;id\&quot; : \&quot;id\&quot; }, { \&quot;unitPrice\&quot; : 6.027456183070403, \&quot;quantity\&quot; : 0, \&quot;id\&quot; : \&quot;id\&quot; } ]&quot;;
+                    ApiUtil.setExampleResponse(request, &quot;application/json&quot;, exampleString);
+                    break;
+                }
+                if (mediaType.isCompatibleWith(MediaType.valueOf(&quot;application/xml&quot;))) {
+                    String exampleString = &quot;&lt;Item&gt; &lt;id&gt;aeiou&lt;/id&gt; &lt;quantity&gt;123&lt;/quantity&gt; &lt;unitPrice&gt;3.149&lt;/unitPrice&gt; &lt;/Item&gt;&quot;;
+                    ApiUtil.setExampleResponse(request, &quot;application/xml&quot;, exampleString);
+                    break;
+                }
+            }
+        });
+        return new ResponseEntity&lt;&gt;(HttpStatus.NOT_IMPLEMENTED);
+
+    }
+
+}
+
+</div><p id="fax9io_192">다음 섹션에서는 OpenAPI Codegen에 의해 생성된 API Java 인터페이스를 구현해볼겁니다.</p></section></section><section class="chapter"><h2 id="3-4-oas" data-toc="3-4-oas">3.4 OAS 코드 인터페이스 구현하기</h2><p id="fax9io_193">지금까지 전자 상거래 앱 모델과 API Java 인터페이스로 구성된 코드를 생성했습니다. 이 생성된 인터페이스에는 우리가 제공한 YAML 설명에 따른 모든 주석이 포함되어 있습니다. 예를 들어, CartApi.java에서 @RequestMapping, @PathVariable 및 @RequestBody에는 엔드포인트 경로 (/api/v1/carts/customerId/items), 경로 변수의 값 (예: 경로 내의 customerId) 및 요청 페이로드 (예: Item)가 각각 포함되어 있습니다. 마찬가지로 생성된 모델에는 JSON 및 XML 콘텐츠 유형을 지원하기 위해 필요한 모든 매핑이 포함되어 있습니다.</p><p id="fax9io_194"><span class="control" id="fax9io_195">Swagger Codegen</span>은 Spring 코드를 대신 작성해줍니다. 우리는 인터페이스를 구현하고 그 안에 비즈니스 로직을 작성하기만 하면 됩니다. Swagger Codegen은 제공된 태그마다 API Java 인터페이스를 생성합니다. 예를 들어, 카트 및 결제 태그에 대해 각각 CartApi 및 PaymentAPI Java 인터페이스를 생성합니다. 모든 경로는 주어진 태그에 기반하여 하나의 Java 인터페이스로 결합됩니다. 예를 들어, <span id="fax9io_196"><b><font style="color:#ff7f50">cart</font></b></span> 태그가 있는 모든 API는 CartApi.java라는 하나의 Java 인터페이스로 결합됩니다.</p><p id="fax9io_197">이제는 각 인터페이스마다 클래스를 생성하고 구현하기만 하면 됩니다. com.infosiatec.modern.api.controllers 패키지에 CartController.java를 생성하고 CartApi를 간단히 구현하겠습니다.</p><div class="code-block" data-lang="java">
+@RestController
+public class CartController implements CartApi {
+
+  private static final Logger log = LoggerFactory.getLogger(CartController.class);
+
+  @Override
+  public ResponseEntity&lt;List&lt;Item&gt;&gt; addCartItemsByCustomerId(String customerId, Item item)
+      throws Exception {
+    log.info(&quot;Request for customer ID: {}\nItem: {}&quot;, customerId, item);
+    return ResponseEntity.ok(Collections.emptyList());
+  }
+  
+  ...
+</div><p id="fax9io_199">샘플코드이지만 이렇게 CartApi를 implements 하여 각 메소드를 구현하면 됩니다. 실제 구현 코드는 다음장에서 진행하겠습니다.</p></section><section class="chapter"><h2 id="3-5-global-exception-handler" data-toc="3-5-global-exception-handler">3.5 Global Exception Handler 추가하기</h2><p id="fax9io_200">대개 프로젝트 내에는 복수의 메서드로 이루어진 복수의 컨트롤러가 있을겁니다. 각 메서드에는 Checked exception과 Unchecked exception이 발생할 수 있습니다. 이러한 모든 오류를 처리하기 위해 중앙 집중식 예외 처리기를 만들어야 합니다. 유지보수 및 모듈화가 잘 되고 깔끔한 코드를 유지할 수 있습니다.</p><p id="fax9io_201">스프링은 이를 위한 AOP 기능을 제공합니다. @ControllerAdvice 어노테이션을 사용하여 전역 예외 처리기를 만들 수 있습니다. 그 후 각 예외 유형에 @ExceptionHandler를 추가하기만 하면 됩니다.</p><p id="fax9io_202">먼저 모든 오류 정보를 담을 <span id="fax9io_203"><b><font style="color:#ff7f50">Error</font></b></span> 클래스를 하나 만듭니다.</p><div class="code-collapse" data-lang="java" data-is-expanded="false" data-synopsis="@Getter">
+
+@Getter
+@Setter
+public class Error {
+
+  private String errorCode;
+  private String message;
+  private Integer status;
+  private String url = &quot;Not available&quot;;
+  private String reqMethod = &quot;Not available&quot;;
+}
+
+</div><p id="fax9io_206">사용자 정의 오류 코드 및 메세지를 담을 <span id="fax9io_207"><b><font style="color:#ff7f50">ErrorCode</font></b></span> enum을 추가합니다.</p><div class="code-collapse" data-lang="java" data-is-expanded="false" data-synopsis="public enum ErrorCode {">
+
+public enum ErrorCode {
+
+  // Internal Errors: 1 to 0999
+  GENERIC_ERROR(&quot;ERR-0001&quot;, &quot;The system is unable to complete the request. Contact system support.&quot;),
+  HTTP_MEDIATYPE_NOT_SUPPORTED(&quot;ERR-0002&quot;, &quot;Requested media type is not supported. Please use application/json or application/xml as 'Content-Type' header value&quot;),
+  HTTP_MESSAGE_NOT_WRITABLE(&quot;ERR-0003&quot;, &quot;Missing 'Accept' header. Please add 'Accept' header.&quot;),
+  HTTP_MEDIA_TYPE_NOT_ACCEPTABLE(&quot;ERR-0004&quot;, &quot;Requested 'Accept' header value is not supported. Please use application/json or application/xml as 'Accept' value&quot;),
+  JSON_PARSE_ERROR(&quot;ERR-0005&quot;, &quot;Make sure request payload should be a valid JSON object.&quot;),
+  HTTP_MESSAGE_NOT_READABLE(&quot;ERR-0006&quot;, &quot;Make sure request payload should be a valid JSON or XML object according to 'Content-Type'.&quot;);
+
+  private String errCode;
+  private String errMsgKey;
+
+  ErrorCode(final String errCode, final String errMsgKey) {
+    this.errCode = errCode;
+    this.errMsgKey = errMsgKey;
+  }
+
+  public String getErrCode() {
+    return errCode;
+  }
+
+  public String getErrMsgKey() {
+    return errMsgKey;
+  }
+}
+
+</div><p id="fax9io_210">Error 객체를 생성해 줄 <span id="fax9io_211"><b><font style="color:#ff7f50">ErrorUtils</font></b></span> 클래스를 추가합니다.</p><div class="code-collapse" data-lang="java" data-is-expanded="false" data-synopsis="public class ErrorUtils {">
+
+public class ErrorUtils {
+
+  public static Error createError(final String errMsgKey, final String errorCode,
+      final Integer httpStatusCode) {
+    Error error = new Error();
+    error.setMessage(errMsgKey);
+    error.setErrorCode(errorCode);
+    error.setStatus(httpStatusCode);
+    
+    return error;
+  }
+}
+
+</div><p id="fax9io_214">이제 예외 처리기를 만들어 보겠습니다. com.infosiatec.modern.api.exceptions 패키지에 <span id="fax9io_215"><b><font style="color:#ff7f50">RestApiErrorHandler</font></b></span>클래스를 생성합니다. <br> 클래스 레벨 애너테이션인 <span id="fax9io_217"><b><font style="color:#ff7f50">@ControllerAdvice</font></b></span>를 사용하여 이 클래스가 전역 예외 처리기임을 나타냅니다. <br> 이를 통해 이 클래스는 REST 컨트롤러에 의한 모든 요청 및 응답 처리를 추적하고 <span id="fax9io_219"><b><font style="color:#ff7f50">@ExceptionHandler</font></b></span>를 사용하여 예외를 처리할 수 있게 됩니다.</p><div class="code-collapse" data-lang="java" data-is-expanded="false" data-synopsis="package com.infosiatec.modern.api.exceptions;">
+
+package com.infosiatec.modern.api.exceptions;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Locale;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+@ControllerAdvice
+public class RestApiErrorHandler {
+
+  private static final Logger log = LoggerFactory.getLogger(RestApiErrorHandler.class);
+  private final MessageSource messageSource;
+
+  @Autowired
+  public RestApiErrorHandler(MessageSource messageSource) {
+    this.messageSource = messageSource;
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity&lt;Error&gt; handleException(HttpServletRequest request, Exception ex,
+      Locale locale) {
+    ex.printStackTrace(); // TODO: Should be kept only for development
+    Error error = ErrorUtils
+        .createError(ErrorCode.GENERIC_ERROR.getErrMsgKey(), ErrorCode.GENERIC_ERROR.getErrCode(),
+            HttpStatus.INTERNAL_SERVER_ERROR.value()).setUrl(request.getRequestURL().toString())
+        .setReqMethod(request.getMethod());
+    return new ResponseEntity&lt;&gt;(error, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+  public ResponseEntity&lt;Error&gt; handleHttpMediaTypeNotSupportedException(HttpServletRequest request,
+      HttpMediaTypeNotSupportedException ex,
+      Locale locale) {
+    ex.printStackTrace(); // TODO: Should be kept only for development
+    Error error = ErrorUtils
+        .createError(ErrorCode.HTTP_MEDIATYPE_NOT_SUPPORTED.getErrMsgKey(),
+            ErrorCode.HTTP_MEDIATYPE_NOT_SUPPORTED.getErrCode(),
+            HttpStatus.UNSUPPORTED_MEDIA_TYPE.value()).setUrl(request.getRequestURL().toString())
+        .setReqMethod(request.getMethod());
+    log.info(&quot;HttpMediaTypeNotSupportedException :: request.getMethod(): &quot; + request.getMethod());
+    return new ResponseEntity&lt;&gt;(error, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(HttpMessageNotWritableException.class)
+  public ResponseEntity&lt;Error&gt; handleHttpMessageNotWritableException(HttpServletRequest request,
+      HttpMessageNotWritableException ex,
+      Locale locale) {
+    ex.printStackTrace(); // TODO: Should be kept only for development
+    Error error = ErrorUtils
+        .createError(ErrorCode.HTTP_MESSAGE_NOT_WRITABLE.getErrMsgKey(),
+            ErrorCode.HTTP_MESSAGE_NOT_WRITABLE.getErrCode(),
+            HttpStatus.UNSUPPORTED_MEDIA_TYPE.value()).setUrl(request.getRequestURL().toString())
+        .setReqMethod(request.getMethod());
+    log.info(&quot;HttpMessageNotWritableException :: request.getMethod(): &quot; + request.getMethod());
+    return new ResponseEntity&lt;&gt;(error, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+  public ResponseEntity&lt;Error&gt; handleHttpMediaTypeNotAcceptableException(HttpServletRequest request,
+      HttpMediaTypeNotAcceptableException ex,
+      Locale locale) {
+    ex.printStackTrace(); // TODO: Should be kept only for development
+    Error error = ErrorUtils
+        .createError(ErrorCode.HTTP_MEDIA_TYPE_NOT_ACCEPTABLE.getErrMsgKey(),
+            ErrorCode.HTTP_MEDIA_TYPE_NOT_ACCEPTABLE.getErrCode(),
+            HttpStatus.UNSUPPORTED_MEDIA_TYPE.value()).setUrl(request.getRequestURL().toString())
+        .setReqMethod(request.getMethod());
+    log.info(&quot;HttpMediaTypeNotAcceptableException :: request.getMethod(): &quot; + request.getMethod());
+    return new ResponseEntity&lt;&gt;(error, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity&lt;Error&gt; handleHttpMessageNotReadableException(HttpServletRequest request,
+      HttpMessageNotReadableException ex,
+      Locale locale) {
+    ex.printStackTrace(); // TODO: Should be kept only for development
+    Error error = ErrorUtils
+        .createError(ErrorCode.HTTP_MESSAGE_NOT_READABLE.getErrMsgKey(),
+            ErrorCode.HTTP_MESSAGE_NOT_READABLE.getErrCode(),
+            HttpStatus.NOT_ACCEPTABLE.value()).setUrl(request.getRequestURL().toString())
+        .setReqMethod(request.getMethod());
+    log.info(&quot;HttpMessageNotReadableException :: request.getMethod(): &quot; + request.getMethod());
+    return new ResponseEntity&lt;&gt;(error, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(JsonParseException.class)
+  public ResponseEntity&lt;Error&gt; handleJsonParseException(HttpServletRequest request,
+      JsonParseException ex,
+      Locale locale) {
+    ex.printStackTrace(); // TODO: Should be kept only for development
+    Error error = ErrorUtils
+        .createError(ErrorCode.JSON_PARSE_ERROR.getErrMsgKey(),
+            ErrorCode.JSON_PARSE_ERROR.getErrCode(),
+            HttpStatus.NOT_ACCEPTABLE.value()).setUrl(request.getRequestURL().toString())
+        .setReqMethod(request.getMethod());
+    log.info(&quot;JsonParseException :: request.getMethod(): &quot; + request.getMethod());
+    return new ResponseEntity&lt;&gt;(error, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+}
+
+</div></section><section class="chapter"><h2 id="3-6-api" data-toc="3-6-api">3.6 구현된 API를 테스트 해보기</h2><p id="fax9io_222">코드가 실행 준비가 되면 프로젝트의 루트 폴더에서 다음 명령을 사용하여 아티팩트를 컴파일하고 빌드할 수 있습니다. build/libs 내에 jar 파일이 생성됩니다.</p><div class="code-block" data-lang="bash">
+./gradlew clean build
+</div><p id="fax9io_224">성공적인 빌드 후에는 다음 명령을 사용하여 애플리케이션을 실행할 수 있습니다. (jar 파일명은 다를 수 있으니 확인하세요. 예: Chapter3-0.0.1-SNAPSHOT.jar)</p><div class="code-block" data-lang="bash">
+java -jar build/libs/Chapter3-0.0.1-SNAPSHOT.jar
+</div><p id="fax9io_226">애플리케이션이 실행되면 curl 명령을 사용하여 API를 테스트할 수 있습니다.</p><div class="code-block" data-lang="bash">
+curl --request GET 'http://localhost:8080/api/v1/carts/1' --header 'Accept: application/xml'
+</div><p id="fax9io_228">이 명령은 ID 1을 사용하여 /carts에 대한 GET 요청을 호출합니다. 여기서 우리는 Accept 헤더를 사용하여 XML 응답을 요구하고 다음 응답을 받습니다.</p><div class="code-block" data-lang="markup">
+&lt;Error&gt;
+    &lt;errorCode&gt;ERR-0001&lt;/errorCode&gt;
+    &lt;message&gt;The system is unable to complete the request. Contact system support.&lt;/message&gt;
+    &lt;status&gt;500&lt;/status&gt;
+    &lt;url&gt;http://localhost:38080/api/v1/carts/1&lt;/url&gt;
+    &lt;reqMethod&gt;GET&lt;/reqMethod&gt;
+&lt;/Error&gt;
+</div><p id="fax9io_230">Accept 헤더를 application/xml에서 application/json으로 변경하면 다음과 같은 JSON 응답을 받게 됩니다.</p><div class="code-block" data-lang="json">
+{
+  &quot;errorCode&quot;:&quot;ERR-0001&quot;,
+  &quot;message&quot;:&quot;The system is unable to complete the request. Contact system support.&quot;,
+  &quot;status&quot;:500,
+  &quot;url&quot;:&quot;http://localhost:38080/api/v1/carts/1&quot;,
+  &quot;reqMethod&quot;:&quot;GET&quot;
+}
+</div><p id="fax9io_232">카트에 추가할 수도 있습니다.</p><div class="code-block" data-lang="bash">
+curl --request POST 'http://localhost:8080/api/v1/carts/1/items' \
+ --header 'Content-Type: application/json' \
+ --header 'Accept: application/json' \
+ --data-raw '{
+ &quot;id&quot;: &quot;1&quot;,
+ &quot;quantity&quot;: 1,
+ &quot;unitPrice&quot;: 2.5
+ }'
+</div><p id="fax9io_234">빈 배열을 응답으로 받습니다. 구현에서 빈 컬렉션을 반환하기 때문입니다. 페이로드(아이템 객체)를 요청과 함께 보내기 때문에 이 요청에 Content-Type 헤더를 제공해야 합니다. 페이로드가 XML로 작성된 경우 Content-Type를 application/xml로 변경해야 합니다. Accept 헤더 값이 application/xml이면  값을 반환하게 됩니다.</p></section><div class="last-modified">Last modified: 20 6월 2024</div><div data-feedback-placeholder="true"></div><div class="navigation-links _bottom"><a href="chapter02.html" class="navigation-links__prev">Chapter 2 - Spring Framework 기초</a><a href="chapter04.html" class="navigation-links__next">Chapter 4 - 비즈니스 로직 구현</a></div></article><div id="disqus_thread"></div></div></section></main></div><script src="https://resources.jetbrains.com/writerside/apidoc/6.10.0-b267/app.js"></script></body></html>
